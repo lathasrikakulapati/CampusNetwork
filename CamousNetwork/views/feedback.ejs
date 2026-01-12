@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+        }
+        .navbar {
+            background: #232f3e;
+            padding: 1rem;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .feedback-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .feedback-form h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        .rating-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .rating-options label {
+            display: flex;
+            align-items: center;
+            margin: 0;
+            font-weight: normal;
+        }
+        .rating-options input[type="radio"] {
+            margin-right: 0.5rem;
+        }
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 1rem;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 150px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4caf50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .success-message {
+            display: none;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1 style="margin: 0; display: inline;">Campus Network - Feedback</h1>
+        <div style="float: right;">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="feedback-form">
+            <div class="success-message" id="successMessage">
+                Thank you for your feedback! We appreciate your input.
+            </div>
+            <h2>Share Your Feedback</h2>
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label>How would you rate your experience?</label>
+                    <div class="rating-options">
+                        <label><input type="radio" name="rating" value="1" required> Poor</label>
+                        <label><input type="radio" name="rating" value="2"> Fair</label>
+                        <label><input type="radio" name="rating" value="3"> Good</label>
+                        <label><input type="radio" name="rating" value="4"> Very Good</label>
+                        <label><input type="radio" name="rating" value="5"> Excellent</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Your Feedback</label>
+                    <textarea id="message" name="message" placeholder="Please share your thoughts..." required></textarea>
+                </div>
+
+                <button type="submit">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(document.getElementById('feedbackForm'));
+            const data = {
+                rating: parseInt(formData.get('rating')),
+                message: formData.get('message'),
+            };
+
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    document.getElementById('successMessage').style.display = 'block';
+                    document.getElementById('feedbackForm').reset();
+                    setTimeout(() => {
+                        document.getElementById('successMessage').style.display = 'none';
+                    }, 5000);
+                } else {
+                    const result = await response.json();
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                alert('An error occurred while submitting feedback.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+        }
+        .navbar {
+            background: #232f3e;
+            padding: 1rem;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+            transition: color 0.3s;
+        }
+        .navbar a:hover {
+            color: #4caf50;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .welcome {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Campus Network</h1>
+        <a href="/">Home</a>
+        <a href="/profile">Profile</a>
+        <a href="/mock-interview">Mock Interview</a>
+        <a href="/interview-questions">Interview Questions</a>
+        <a href="/placement-calendar">Placement Calendar</a>
+        <a href="/feedback">Feedback</a>
+        <a href="/faq">FAQ</a>
+        <a href="/auth/logout">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="welcome">
+            <h1>Welcome, <%= user %>!</h1>
+            <p>Select an activity to get started</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>📝 Mock Interviews</h3>
+                <p>Practice with mock interview questions to prepare for placements</p>
+                <a href="/mock-interview" class="btn">Start Quiz</a>
+            </div>
+
+            <div class="card">
+                <h3>� Interview Questions</h3>
+                <p>View company-specific interview questions by round</p>
+                <a href="/interview-questions" class="btn">View Questions</a>
+            </div>
+
+            <div class="card">
+                <h3>�📅 Placement Calendar</h3>
+                <p>View upcoming placement drives and company schedules</p>
+                <a href="/placement-calendar" class="btn">View Calendar</a>
+            </div>
+
+            <div class="card">
+                <h3>💬 Feedback</h3>
+                <p>Share your thoughts and feedback about the platform</p>
+                <a href="/feedback" class="btn">Give Feedback</a>
+            </div>
+
+            <div class="card">
+                <h3>❓ FAQ</h3>
+                <p>Ask and answer questions from the community</p>
+                <a href="/faq" class="btn">Visit FAQ</a>
+            </div>
+
+            <div class="card">
+                <h3>👤 My Profile</h3>
+                <p>View your profile and quiz performance</p>
+                <a href="/profile" class="btn">View Profile</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

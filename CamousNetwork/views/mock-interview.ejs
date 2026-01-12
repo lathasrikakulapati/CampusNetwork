@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Interview Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fc;
+            margin: 0;
+            padding: 1rem;
+        }
+        .navbar {
+            background: #232f3e;
+            padding: 1rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #4c6ef5;
+        }
+        .quiz-container {
+            width: 90%;
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .question {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .question p {
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .option {
+            margin: 0.5rem 0;
+        }
+        .option input[type="radio"] {
+            margin-right: 0.5rem;
+        }
+        .option label {
+            margin-left: 0.5rem;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: background 0.3s;
+        }
+        .submit-btn:hover {
+            background: #45a049;
+        }
+        #result {
+            text-align: center;
+            padding: 2rem;
+            background: #e8f5e9;
+            border-radius: 8px;
+            margin-top: 2rem;
+            display: none;
+        }
+        #result h2 {
+            color: #4caf50;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Campus Network - Mock Interview</h1>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/auth/logout">Logout</a>
+    </div>
+
+    <div class="quiz-container">
+        <h2>Mock Interview Quiz</h2>
+        <form id="quizForm" method="POST" action="/api/quiz/submit">
+            <div id="questionsContainer"></div>
+            <button type="submit" class="submit-btn">Submit Quiz</button>
+        </form>
+        <div id="result">
+            <h2>Quiz Results</h2>
+            <p id="scoreMessage"></p>
+            <a href="/mock-interview" style="color: #4caf50; text-decoration: none;">Take Quiz Again</a>
+        </div>
+    </div>
+
+    <script>
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/api/quiz/questions');
+                const questions = await response.json();
+
+                const container = document.getElementById('questionsContainer');
+                container.innerHTML = '';
+
+                questions.forEach((question, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'question';
+                    questionDiv.innerHTML = `
+                        <p>${index + 1}. ${question.question}</p>
+                        <div class="option">
+                            <input type="radio" id="q${question._id}_1" name="question_${question._id}" value="${question.option1}">
+                            <label for="q${question._id}_1">${question.option1}</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${question._id}_2" name="question_${question._id}" value="${question.option2}">
+                            <label for="q${question._id}_2">${question.option2}</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${question._id}_3" name="question_${question._id}" value="${question.option3}">
+                            <label for="q${question._id}_3">${question.option3}</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${question._id}_4" name="question_${question._id}" value="${question.option4}">
+                            <label for="q${question._id}_4">${question.option4}</label>
+                        </div>
+                    `;
+                    container.appendChild(questionDiv);
+                });
+            } catch (error) {
+                console.error('Error loading questions:', error);
+            }
+        }
+
+        document.getElementById('quizForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(document.getElementById('quizForm'));
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/quiz/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('quizForm').style.display = 'none';
+                    document.getElementById('result').style.display = 'block';
+                    document.getElementById('scoreMessage').textContent = `You scored ${result.score} out of ${result.total}!`;
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error submitting quiz:', error);
+                alert('An error occurred while submitting the quiz.');
+            }
+        });
+
+        loadQuestions();
+    </script>
+</body>
+</html>

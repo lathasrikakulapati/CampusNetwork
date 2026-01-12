@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Mock Questions</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+        .navbar { background: #232f3e; padding: 1rem; color: white; }
+        .navbar a { color: white; text-decoration: none; margin-right: 1rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .form-section { background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: bold; margin-bottom: 0.3rem; }
+        input, textarea, select { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 0.75rem 1.5rem; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #45a049; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        table th, table td { padding: 0.75rem; border: 1px solid #ddd; text-align: left; }
+        table th { background: #f0f0f0; font-weight: bold; }
+        .btn-delete { background: #dc3545; padding: 0.5rem 1rem; font-size: 0.9rem; }
+        .btn-delete:hover { background: #c82333; }
+        .btn-edit { background: #007bff; padding: 0.5rem 1rem; font-size: 0.9rem; }
+        .btn-edit:hover { background: #0056b3; }
+    </style>
+    </head>
+<body>
+    <div class="navbar">
+        <h1 style="display:inline; margin:0;">Manage Mock Questions</h1>
+        <div style="float:right;">
+            <a href="/admin">Dashboard</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Add New Mock Question</h2>
+            <form id="addMockForm">
+                <div class="form-group">
+                    <label>Question:</label>
+                    <input type="text" id="question" name="question" required>
+                </div>
+                <div class="form-group">
+                    <label>Option 1:</label>
+                    <input type="text" id="option1" name="option1" required>
+                </div>
+                <div class="form-group">
+                    <label>Option 2:</label>
+                    <input type="text" id="option2" name="option2" required>
+                </div>
+                <div class="form-group">
+                    <label>Option 3:</label>
+                    <input type="text" id="option3" name="option3" required>
+                </div>
+                <div class="form-group">
+                    <label>Option 4:</label>
+                    <input type="text" id="option4" name="option4" required>
+                </div>
+                <div class="form-group">
+                    <label>Answer (exact option text):</label>
+                    <input type="text" id="answer" name="answer" required>
+                </div>
+                <button type="submit">Add Question</button>
+            </form>
+        </div>
+
+        <div class="form-section">
+            <h2>Mock Questions List</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Options</th>
+                        <th>Answer</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="mockTable">
+                    <!-- Filled by server when rendered -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function loadMockQuestions() {
+            try {
+                const res = await fetch('/api/mock-questions');
+                const questions = await res.json();
+                const tbody = document.getElementById('mockTable');
+                tbody.innerHTML = '';
+                if (!Array.isArray(questions) || questions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No questions yet</td></tr>';
+                    return;
+                }
+                questions.forEach(q => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${q.question}</td>
+                        <td>
+                            1) ${q.option1}<br>
+                            2) ${q.option2}<br>
+                            3) ${q.option3}<br>
+                            4) ${q.option4}
+                        </td>
+                        <td>${q.answer}</td>
+                        <td>
+                            <button class="btn-delete" onclick="deleteMock('${q._id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                alert('Error loading questions: ' + err.message);
+            }
+        }
+
+        document.getElementById('addMockForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                question: document.getElementById('question').value,
+                option1: document.getElementById('option1').value,
+                option2: document.getElementById('option2').value,
+                option3: document.getElementById('option3').value,
+                option4: document.getElementById('option4').value,
+                answer: document.getElementById('answer').value,
+            };
+            try {
+                const res = await fetch('/api/mock-questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert('Question added');
+                    document.getElementById('addMockForm').reset();
+                    loadMockQuestions();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + (err.error || 'unknown'));
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        });
+
+        async function deleteMock(id) {
+            if (!confirm('Delete this question?')) return;
+            try {
+                const res = await fetch('/api/mock-questions/' + id, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('Deleted');
+                    loadMockQuestions();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + (err.error || 'unknown'));
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        loadMockQuestions();
+    </script>
+</body>
+</html>

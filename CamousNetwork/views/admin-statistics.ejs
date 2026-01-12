@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+        .navbar { background: #232f3e; padding: 1rem; color: white; }
+        .navbar a { color: white; text-decoration: none; margin-right: 1rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .stat-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; }
+        .stat-card h3 { margin: 0 0 0.5rem 0; color: #555; }
+        .stat-value { font-size: 3rem; font-weight: bold; color: #4caf50; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1 style="display:inline; margin:0;">Platform Statistics</h1>
+        <div style="float:right;">
+            <a href="/admin">Dashboard</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Users</h3>
+                <div class="stat-value"><%= totalUsers %></div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Feedback</h3>
+                <div class="stat-value"><%= totalFeedback %></div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Placement Events</h3>
+                <div class="stat-value"><%= totalEvents %></div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Interview Questions</h3>
+                <div class="stat-value"><%= totalQuestions %></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

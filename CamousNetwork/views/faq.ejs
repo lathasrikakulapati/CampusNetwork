@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+        }
+        .navbar {
+            background: #232f3e;
+            padding: 1rem;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .question-form {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            min-height: 100px;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .faq-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .faq-item .question {
+            font-weight: bold;
+            cursor: pointer;
+            color: #4c6ef5;
+            margin: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-item .question:hover {
+            text-decoration: underline;
+        }
+        .faq-item .answers {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        .faq-item .answers.show {
+            display: block;
+        }
+        .answer {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .answer-by {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1 style="margin: 0; display: inline;">Campus Network - FAQ</h1>
+        <div style="float: right;">
+            <% if (user) { %>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/auth/logout">Logout</a>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>❓ Frequently Asked Questions</h1>
+
+        <% if (user) { %>
+            <div class="question-form">
+                <h3>Ask a Question</h3>
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="question">Your Question</label>
+                        <textarea id="question" name="question" placeholder="Type your question here..." required></textarea>
+                    </div>
+                    <button type="submit">Post Question</button>
+                </form>
+            </div>
+        <% } %>
+
+        <div class="faq-list" id="faqList">
+            <div style="text-align: center; color: #888;">Loading FAQ...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadFAQs() {
+            try {
+                const response = await fetch('/api/faq');
+                const faqs = await response.json();
+
+                const container = document.getElementById('faqList');
+                container.innerHTML = '';
+
+                if (faqs.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #888;">No questions yet. Be the first to ask!</div>';
+                    return;
+                }
+
+                faqs.forEach((faq, index) => {
+                    const faqDiv = document.createElement('div');
+                    faqDiv.className = 'faq-item';
+                    
+                    let answersHTML = '';
+                    if (faq.answers && faq.answers.length > 0) {
+                        answersHTML = faq.answers.map(ans => 
+                            `<div class="answer">
+                                ${ans.answer}
+                                <div class="answer-by">— Answered by ${ans.answeredBy} on ${new Date(ans.answeredAt).toLocaleDateString()}</div>
+                            </div>`
+                        ).join('');
+                    } else {
+                        answersHTML = '<div class="answer" style="color: #888;">No answers yet.</div>';
+                    }
+
+                    faqDiv.innerHTML = `
+                        <p class="question">
+                            Q${index + 1}: ${faq.question}
+                            <span style="font-size: 0.8rem;">${faq.answers && faq.answers.length > 0 ? '✓' : '○'}</span>
+                        </p>
+                        <div class="answers">
+                            ${answersHTML}
+                        </div>
+                    `;
+
+                    faqDiv.querySelector('.question').addEventListener('click', () => {
+                        faqDiv.querySelector('.answers').classList.toggle('show');
+                    });
+
+                    container.appendChild(faqDiv);
+                });
+            } catch (error) {
+                console.error('Error loading FAQs:', error);
+                document.getElementById('faqList').innerHTML = '<div style="text-align: center; color: red;">Error loading FAQ.</div>';
+            }
+        }
+
+        <% if (user) { %>
+            document.getElementById('questionForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(document.getElementById('questionForm'));
+                const data = {
+                    question: formData.get('question'),
+                };
+
+                try {
+                    const response = await fetch('/api/faq/question', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    if (response.ok) {
+                        document.getElementById('questionForm').reset();
+                        alert('Question posted successfully!');
+                        loadFAQs();
+                    } else {
+                        const result = await response.json();
+                        alert('Error: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error posting question:', error);
+                    alert('An error occurred while posting the question.');
+                }
+            });
+        <% } %>
+        
+        loadFAQs();
+    </script>
+</body>
+</html>

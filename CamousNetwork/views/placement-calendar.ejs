@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            margin: 0;
+            padding: 1rem;
+        }
+        .navbar {
+            background: #232f3e;
+            padding: 1rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .container { max-width:1000px; margin:0 auto }
+        h1 { text-align:center; color:#1F2A22 }
+
+        /* PHP-like calendar UI */
+        .heading { text-align:center; margin-bottom:18px }
+        .content { display:flex; gap:24px; align-items:flex-start }
+        .calendar-container { flex:1; padding:18px; background:#eef3f2; border:4px solid #83d0cb; border-radius:6px; position:relative }
+        .navigation { display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:10px }
+        .navigation button { width:48px; height:48px; background:#0f9bb0; color:white; border:none; border-radius:6px; font-size:18px; cursor:pointer }
+        #monthYear { font-weight:700; color:#0f9bb0 }
+
+        .calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; align-items:center }
+        .day-name { text-align:center; font-weight:700; color:#0f9bb0; font-size:14px }
+
+        .day { height:60px; width:60px; margin:0 auto; display:flex; align-items:center; justify-content:center; background:#e9fbfb; border-radius:50%; color:#1F2A22; font-size:16px; position:relative; cursor:pointer }
+        .day:hover { transform:translateY(-3px); transition:transform 120ms }
+        .day.marked { background:#0f6f80; color:#fff; box-shadow:0 2px 0 rgba(0,0,0,0.08) }
+        .day .company-label { font-size:12px; font-weight:700 }
+
+        .event-details { width:220px; background:#fff; padding:12px; border:1px solid #e6e6e6; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.06) }
+        .event-details h3{ margin-top:0; font-size:1rem }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1 style="margin: 0; display: inline;">Campus Network - Placement Calendar</h1>
+        <div style="float: right;">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="heading">
+        <h1>Placement Calendar</h1>
+        <p>Know When and Which Company is Coming!!</p>
+    </div>
+
+    <div class="content">
+        <div class="calendar-container">
+            <div class="navigation">
+                <button onclick="prevMonth()">❮</button>
+                <span id="monthYear"></span>
+                <button onclick="nextMonth()">❯</button>
+            </div>
+            <div id="calendar" class="calendar"></div>
+        </div>
+
+        <div class="event-details">
+            <h3>Company Details</h3>
+            <p><strong>Company:</strong> <span id="companyName"></span></p>
+            <p><strong>Rounds:</strong> <span id="rounds"></span></p>
+            <p><strong>Round Types:</strong> <span id="roundTypes"></span></p>
+        </div>
+    </div>
+
+    <script>
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+
+        let placementEvents = {};
+
+        async function loadPlacementEvents() {
+            try {
+                const [eventsRes, imgRes] = await Promise.all([
+                    fetch('/api/placement'),
+                    fetch('/placement-calendar-image.json').catch(() => null)
+                ]);
+
+                const events = await eventsRes.json();
+                placementEvents = {};
+                events.forEach(row => {
+                    // support both camelCase and snake_case from different models
+                    const dateStr = row.eventDate || row.event_date;
+                    const d = new Date(dateStr);
+                    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                    placementEvents[key] = row;
+                });
+
+                if (imgRes && imgRes.ok) {
+                    const imgJson = await imgRes.json();
+                    if (imgJson && imgJson.image) {
+                        const cont = document.querySelector('.calendar-container');
+                        cont.style.backgroundImage = `url(${imgJson.image})`;
+                        cont.style.backgroundSize = 'contain';
+                        cont.style.backgroundRepeat = 'no-repeat';
+                        cont.style.backgroundPosition = 'center top';
+                    }
+                }
+
+                generateCalendar(currentYear, currentMonth);
+            } catch (err) {
+                console.error('Error loading placement events', err);
+                document.getElementById('calendar').innerHTML = '<div class="empty-state">Error loading events.</div>';
+            }
+        }
+
+        function generateCalendar(year, month) {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+
+            document.getElementById('monthYear').textContent = `${months[month]} ${year}`;
+
+            // day names
+            for (let i=0;i<days.length;i++){
+                const dn = document.createElement('div'); dn.className='day-name'; dn.textContent=days[i]; calendar.appendChild(dn);
+            }
+
+            const firstDay = new Date(year, month, 1).getDay();
+            for (let i=0;i<firstDay;i++){ const blank=document.createElement('div'); blank.className='day'; calendar.appendChild(blank);} 
+
+            const daysInMonth = new Date(year, month+1, 0).getDate();
+            for (let d=1; d<=daysInMonth; d++){
+                const day = document.createElement('div'); day.className='day'; day.textContent=d;
+                const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    if (placementEvents[dateKey]) {
+                        day.classList.add('marked');
+                        // show company label inside the circle (shortened)
+                        const label = document.createElement('div');
+                        label.className = 'company-label';
+                        const name = (placementEvents[dateKey].companyName || placementEvents[dateKey].company_name || '').split(' ')[0];
+                        label.textContent = name;
+                        day.innerHTML = '';
+                        day.appendChild(label);
+                }
+                day.addEventListener('click', ()=>{
+                    const ev = placementEvents[dateKey];
+                    if (ev){
+                        document.getElementById('companyName').textContent = ev.companyName || ev.company_name || '';
+                        document.getElementById('rounds').textContent = ev.rounds || '';
+                        document.getElementById('roundTypes').textContent = ev.roundTypes || ev.round_types || '';
+                    } else {
+                        document.getElementById('companyName').textContent = '';
+                        document.getElementById('rounds').textContent = '';
+                        document.getElementById('roundTypes').textContent = '';
+                    }
+                });
+                calendar.appendChild(day);
+            }
+        }
+
+        function prevMonth(){ if (currentMonth===0){currentMonth=11; currentYear--;} else currentMonth--; generateCalendar(currentYear,currentMonth);} 
+        function nextMonth(){ if (currentMonth===11){currentMonth=0; currentYear++;} else currentMonth++; generateCalendar(currentYear,currentMonth);} 
+
+        loadPlacementEvents();
+    </script>
+</body>
+</html>

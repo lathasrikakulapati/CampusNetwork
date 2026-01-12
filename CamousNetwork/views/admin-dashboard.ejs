@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+        }
+        .navbar {
+            background: #232f3e;
+            padding: 1rem;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .admin-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .admin-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 1rem;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        table th, table td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        table th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1 style="margin: 0; display: inline;">Admin Dashboard</h1>
+        <div style="float: right;">
+            <a href="/">Home</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Admin Controls</h1>
+
+        <div class="admin-grid">
+            <div class="admin-card">
+                <h3>Manage Interview Questions</h3>
+                <p>Add, edit, or delete interview/company questions</p>
+                <a href="/admin/interview-questions" class="btn">Manage Interview Questions</a>
+            </div>
+
+            <div class="admin-card">
+                <h3>Manage Mock Questions</h3>
+                <p>Manage the mock-interview quiz questions</p>
+                <a href="/admin/mock-questions" class="btn">Manage Mock Questions</a>
+            </div>
+
+            <div class="admin-card">
+                <h3>Manage Placement Events</h3>
+                <p>Create and manage placement drive schedules</p>
+                <a href="/admin/placement-events" class="btn">Manage Events</a>
+            </div>
+
+            <div class="admin-card">
+                <h3>View Feedback</h3>
+                <p>Review user feedback and ratings</p>
+                <a href="/admin/feedback" class="btn">View Feedback</a>
+            </div>
+
+            <div class="admin-card">
+                <h3>Answer FAQ</h3>
+                <p>Respond to user questions</p>
+                <a href="/admin/faq" class="btn">Answer Questions</a>
+            </div>
+
+            <div class="admin-card">
+                <h3>Manage Users</h3>
+                <p>View and manage user accounts</p>
+                <a href="/admin/users" class="btn">Manage Users</a>
+            </div>
+
+            <div class="admin-card">
+                <h3>View Statistics</h3>
+                <p>View platform usage and analytics</p>
+                <a href="/admin/statistics" class="btn">View Stats</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

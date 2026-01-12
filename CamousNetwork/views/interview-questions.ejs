@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Questions</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7fc; margin: 0; padding: 1rem; }
+        .navbar { background: #232f3e; padding: 1rem; color: white; margin-bottom: 2rem; }
+        .navbar a { color: white; text-decoration: none; margin-right: 1rem; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .company { background: white; padding: 1rem; margin: 1rem 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .round { margin-top: 0.5rem; padding: 0.75rem; border-left: 4px solid #4c6ef5; background: #fbfdff; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1 style="display:inline; margin:0;">Campus Network - Interview Questions</h1>
+        <div style="float:right;">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Interview Questions by Company</h2>
+        <div id="questionsContainer">Loading questions...</div>
+    </div>
+
+    <script>
+        async function loadQuestions() {
+            try {
+                const res = await fetch('/api/interview-questions');
+                const questions = await res.json();
+
+                const container = document.getElementById('questionsContainer');
+                container.innerHTML = '';
+
+                if (!Array.isArray(questions) || questions.length === 0) {
+                    container.innerHTML = '<div class="company">No interview questions available.</div>';
+                    return;
+                }
+
+                // Group questions by company and roundTypes
+                const grouped = {};
+                questions.forEach(q => {
+                    const company = q.companyName || 'Unknown Company';
+                    const round = (q.roundTypes || 'General').trim();
+                    if (!grouped[company]) grouped[company] = {};
+                    if (!grouped[company][round]) grouped[company][round] = [];
+                    grouped[company][round].push(...(Array.isArray(q.questions) ? q.questions : [q.questions]));
+                });
+
+                Object.keys(grouped).forEach(company => {
+                    const compDiv = document.createElement('div');
+                    compDiv.className = 'company';
+                    let inner = `<h3>${company}</h3>`;
+
+                    Object.keys(grouped[company]).forEach(round => {
+                        inner += `<div class="round"><strong>${round}</strong><ol>`;
+                        grouped[company][round].forEach(qText => {
+                            inner += `<li>${qText}</li>`;
+                        });
+                        inner += `</ol></div>`;
+                    });
+
+                    compDiv.innerHTML = inner;
+                    container.appendChild(compDiv);
+                });
+            } catch (err) {
+                console.error('Error loading interview questions:', err);
+                document.getElementById('questionsContainer').innerHTML = '<div class="company">Error loading questions.</div>';
+            }
+        }
+
+        loadQuestions();
+    </script>
+</body>
+</html>

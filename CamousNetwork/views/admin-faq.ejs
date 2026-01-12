@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage FAQ</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+        .navbar { background: #232f3e; padding: 1rem; color: white; }
+        .navbar a { color: white; text-decoration: none; margin-right: 1rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .faq-item { background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .form-section { background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: bold; margin-bottom: 0.3rem; }
+        input, textarea { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 0.75rem 1.5rem; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #45a049; }
+        .btn-delete { background: #dc3545; padding: 0.5rem 1rem; font-size: 0.9rem; }
+        .btn-delete:hover { background: #c82333; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1 style="display:inline; margin:0;">Manage FAQ</h1>
+        <div style="float:right;">
+            <a href="/admin">Dashboard</a>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Add New FAQ</h2>
+            <form id="addFaqForm">
+                <div class="form-group">
+                    <label>Question:</label>
+                    <input type="text" id="question" name="question" required>
+                </div>
+                <div class="form-group">
+                    <label>Answer:</label>
+                    <textarea id="answer" name="answer" rows="4" required></textarea>
+                </div>
+                <button type="submit">Add FAQ</button>
+            </form>
+        </div>
+
+        <h2>FAQ List</h2>
+        <% if (faqs.length === 0) { %>
+            <div class="faq-item">
+                <p>No FAQs yet.</p>
+            </div>
+        <% } else { %>
+            <% faqs.forEach(f => { %>
+                <div class="faq-item">
+                    <h3><%= f.question %></h3>
+                    <p><%= f.answer %></p>
+                    <button class="btn-delete" onclick="deleteFaq('<%= f._id %>')">Delete</button>
+                </div>
+            <% }); %>
+        <% } %>
+    </div>
+
+    <script>
+        document.getElementById('addFaqForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                question: document.getElementById('question').value,
+                answer: document.getElementById('answer').value
+            };
+
+            try {
+                const res = await fetch('/api/faq', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (res.ok) {
+                    alert('FAQ added successfully!');
+                    document.getElementById('addFaqForm').reset();
+                    location.reload();
+                } else {
+                    const error = await res.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (err) {
+                alert('Error adding FAQ: ' + err.message);
+            }
+        });
+
+        async function deleteFaq(id) {
+            if (!confirm('Are you sure?')) return;
+
+            try {
+                const res = await fetch(`/api/faq/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    alert('FAQ deleted!');
+                    location.reload();
+                } else {
+                    alert('Error deleting FAQ');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

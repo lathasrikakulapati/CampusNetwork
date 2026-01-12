@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+            margin: 0;
+        }
+        .navbar {
+            background: #232f3e;
+            padding: 1rem;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .profile-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .profile-card h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .profile-info {
+            margin: 1rem 0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-info label {
+            font-weight: bold;
+            color: #555;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #d9534f;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background: #c9302c;
+        }
+        .scores-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .scores-section h3 {
+            color: #333;
+        }
+        #scoresChart {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Campus Network</h1>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/auth/logout">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="profile-card">
+            <h2>User Profile</h2>
+            <div class="profile-info">
+                <label>Name:</label> <%= user.name %>
+            </div>
+            <div class="profile-info">
+                <label>Email:</label> <%= user.email %>
+            </div>
+            <div class="profile-info">
+                <label>Member Since:</label> <%= new Date(user.createdAt).toLocaleDateString() %>
+            </div>
+            <a href="/dashboard" class="btn">Back to Dashboard</a>
+        </div>
+
+        <div class="scores-section">
+            <h3>Quiz Performance</h3>
+            <% if (scores.length > 0) { %>
+                <canvas id="scoresChart"></canvas>
+                <table style="width: 100%; margin-top: 1rem; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f0f0f0;">
+                            <th style="padding: 0.5rem; border: 1px solid #ddd;">Date</th>
+                            <th style="padding: 0.5rem; border: 1px solid #ddd;">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% scores.forEach(score => { %>
+                            <tr>
+                                <td style="padding: 0.5rem; border: 1px solid #ddd;"><%= new Date(score.date).toLocaleDateString() %></td>
+                                <td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;"><%= score.score %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                <script>
+                    const ctx = document.getElementById('scoresChart').getContext('2d');
+                    const scoreData = <%- JSON.stringify(scores.map(s => s.score)) %>;
+                    const dateData = <%- JSON.stringify(scores.map(s => new Date(s.date).toLocaleDateString())) %>;
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: dateData,
+                            datasets: [{
+                                label: 'Quiz Scores',
+                                data: scoreData,
+                                borderColor: '#4caf50',
+                                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                }
+                            }
+                        }
+                    });
+                </script>
+            <% } else { %>
+                <p style="color: #888;">No quiz scores yet. Start a mock interview to see your progress!</p>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>
